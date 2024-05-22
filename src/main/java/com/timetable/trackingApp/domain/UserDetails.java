@@ -1,4 +1,4 @@
-package com.timetable.trackingApp;
+package com.timetable.trackingApp.domain;
 
 import lombok.Getter;
 import lombok.Setter;

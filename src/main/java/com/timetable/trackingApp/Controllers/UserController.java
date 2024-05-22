@@ -1,5 +1,7 @@
 package com.timetable.trackingApp;
 
+import com.timetable.trackingApp.domain.UserDetails;
+import com.timetable.trackingApp.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
