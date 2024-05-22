@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @DeleteMapping("/delete")
-    public UserDetails deleteUser(@RequestParam String documentId) throws InterruptedException, ExecutionException {
+    public String deleteUser(@RequestParam String documentId) throws InterruptedException, ExecutionException {
         return userService.deleteUser(documentId);
     }
 
