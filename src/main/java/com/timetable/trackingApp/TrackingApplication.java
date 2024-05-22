@@ -16,20 +16,6 @@ import java.util.Objects;
 public class TrackingApplication {
 
 	public static void main(String[] args) throws IOException {
-		ClassLoader classLoader = TrackingApplication.class.getClassLoader();
-
-		File file = new File(Objects.requireNonNull(classLoader.getResource("serviceAccountKey.json")).getFile());
-
-		FileInputStream serviceAccount =
-				new FileInputStream(file.getPath());
-
-		FirebaseOptions options = new FirebaseOptions.Builder()
-				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
-				.build();
-
-		FirebaseApp.initializeApp(options);
-
-
 		SpringApplication.run(TrackingApplication.class, args);
 	}
 }
