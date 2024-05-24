@@ -1,6 +1,5 @@
 package com.timetable.trackingApp.controllers;
 
-import com.google.firebase.auth.FirebaseAuthException;
 import com.timetable.trackingApp.services.FirebaseAuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +15,12 @@ public class AppController {
     private FirebaseAuthService authService;
 
     @GetMapping("/getName")
-    public String getPrincipalName(Principal principal) throws FirebaseAuthException {
+    public String getPrincipalName(Principal principal) {
         return authService.getUserName(principal);
+    }
+
+    @GetMapping("/getEmail")
+    public String getPrincipalEmail(Principal principal) {
+        return authService.getUserEmail(principal);
     }
 }

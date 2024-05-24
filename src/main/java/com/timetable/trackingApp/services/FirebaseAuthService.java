@@ -8,8 +8,22 @@ import java.security.Principal;
 
 @Service
 public class FirebaseAuthService {
-    public String getUserName(Principal principal) throws FirebaseAuthException {
-        UserRecord userRecord = FirebaseAuth.getInstance().getUser(principal.getName());
+    public String getUserName(Principal principal) {
+        try {
+            UserRecord userRecord = FirebaseAuth.getInstance().getUser(principal.getName());
+        } catch (FirebaseAuthException e) {
+            return "It's impossible to retrieve a user data";
+        }
         return principal.getName();
+    }
+
+    public String getUserEmail(Principal principal){
+        UserRecord userRecord = null;
+        try {
+            userRecord = FirebaseAuth.getInstance().getUser(principal.getName());
+        } catch (FirebaseAuthException e) {
+            return "It's impossible to retrieve a user data";
+        }
+        return userRecord.getEmail();
     }
 }
