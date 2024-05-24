@@ -1,4 +1,4 @@
-package com.timetable.trackingApp;
+package com.timetable.trackingApp.controllers;
 
 import com.timetable.trackingApp.domain.UserDetails;
 import com.timetable.trackingApp.services.UserService;
