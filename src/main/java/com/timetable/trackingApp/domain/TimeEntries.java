@@ -12,8 +12,8 @@ public class TimeEntries {
     private String id;
     private String userId;
     private String categoryId;
-    private String startDate;
-    private String endDate;
+    private Timestamp startDate;
+    private Timestamp endDate;
     private Long duration; // duration is seconds
 //    private Timestamp updateDate;
 }

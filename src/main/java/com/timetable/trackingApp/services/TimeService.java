@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -72,7 +70,7 @@ public class TimeService {
         if (entity.getStartDate() != null || entity.getEndDate() != null) {
             Optional.ofNullable(entity.getStartDate()).ifPresent(request::setStartDate);
             Optional.ofNullable(entity.getEndDate()).ifPresent(request::setEndDate);
-        // вычисляем новый дюрейшн
+            // вычисляем новый дюрейшн
 //            request.setDuration(Duration.between(entity.getStartDate(), entity.getEndDate()).getSeconds());
         }
 
