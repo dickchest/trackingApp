@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserDetails {
-    private String documentId;
+    private String id;
     private String name;
     private String profession;
 }

@@ -1,18 +1,18 @@
 package com.timetable.trackingApp.services;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.UserRecord;
+import com.google.firebase.auth.*;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FirebaseAuthService {
-    public String getUserName(Principal principal) {
+    public String getUserUid(Principal principal) {
         try {
             UserRecord userRecord = FirebaseAuth.getInstance().getUser(principal.getName());
         } catch (FirebaseAuthException e) {
-            return "It's impossible to retrieve a user data";
+            throw new RuntimeException(e);
         }
         return principal.getName();
     }
@@ -22,8 +22,29 @@ public class FirebaseAuthService {
         try {
             userRecord = FirebaseAuth.getInstance().getUser(principal.getName());
         } catch (FirebaseAuthException e) {
-            return "It's impossible to retrieve a user data";
+            throw new RuntimeException(e);
         }
         return userRecord.getEmail();
+    }
+
+    public List<String> getAll(){
+        List<ExportedUserRecord> allUsers = getAllUserRecords();
+        return allUsers.stream().map(UserRecord::getUid).toList();
+    }
+
+
+
+    private List<ExportedUserRecord> getAllUserRecords () {
+        List<ExportedUserRecord> users = new ArrayList<>();
+        ListUsersPage page;
+
+        try {
+            page = FirebaseAuth.getInstance().listUsers(null);
+            page.iterateAll().forEach(users::add);
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException(e);
+        }
+
+        return users;
     }
 }

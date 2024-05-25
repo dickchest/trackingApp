@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 public class UserService {
     public String createUser(UserDetails user) throws ExecutionException, InterruptedException {
         Firestore dbFirestore = FirestoreClient.getFirestore();
-        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection("user").document(user.getDocumentId()).set(user);
+        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection("user").document(user.getId()).set(user);
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 
@@ -34,7 +34,7 @@ public class UserService {
 
     public String updateUser(UserDetails user) throws ExecutionException, InterruptedException {
         Firestore dbFirestore = FirestoreClient.getFirestore();
-        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection("user").document(user.getDocumentId()).set(user);
+        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection("user").document(user.getId()).set(user);
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 

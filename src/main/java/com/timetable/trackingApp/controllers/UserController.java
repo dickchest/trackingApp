@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
     private UserService userService;
