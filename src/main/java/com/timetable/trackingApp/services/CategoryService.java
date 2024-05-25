@@ -7,48 +7,62 @@ import com.timetable.trackingApp.domain.Categories;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Service
 public class CategoryService {
+    Firestore dbFirestore = FirestoreClient.getFirestore();
+    CollectionReference collection = dbFirestore.collection("categories");
 
     public List<Categories> getAll() throws ExecutionException, InterruptedException {
-        Firestore dbFirestore = FirestoreClient.getFirestore();
-        ApiFuture<QuerySnapshot> future = dbFirestore.collection("categories").get();
+        ApiFuture<QuerySnapshot> future = collection.get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
 
         return documents.stream().map(x -> x.toObject(Categories.class)).toList();
     }
 
-    public String create(Categories entity) throws ExecutionException, InterruptedException {
-        Firestore dbFirestore = FirestoreClient.getFirestore();
-        DocumentReference addedDocRef = dbFirestore.collection("categories").document();
+    public String create(Categories entity) {
+        DocumentReference addedDocRef = collection.document();
         entity.setId(addedDocRef.getId());
         ApiFuture<WriteResult> writeResult = addedDocRef.set(entity);
         return addedDocRef.getId();
     }
 
-    public Categories get(String documentId) throws ExecutionException, InterruptedException {
-        Firestore dbFirestore = FirestoreClient.getFirestore();
-        DocumentReference documentReference = dbFirestore.collection("categories").document(documentId);
-        ApiFuture<DocumentSnapshot> future = documentReference.get();
-        DocumentSnapshot document = future.get();
-        Categories entity = null;
-        if (document.exists()) {
-            entity = document.toObject(Categories.class);
-        }
-        return entity;
+    public Categories get(String documentId) {
+        DocumentSnapshot document = checkIfExistDocument(documentId);
+        return document.toObject(Categories.class);
     }
 
     public String update(Categories entity) throws ExecutionException, InterruptedException {
-        Firestore dbFirestore = FirestoreClient.getFirestore();
-        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection("categories").document(entity.getId()).set(entity);
+        // проверка, есть ли документ
+        Categories request = get(entity.getId());
+        // проверяем каждое поле
+        Optional.ofNullable(entity.getName()).ifPresent(request::setName);
+
+        ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(entity);
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 
     public String delete(String documentId) {
-        Firestore dbFirestore = FirestoreClient.getFirestore();
-        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection("categories").document(documentId).delete();
+        // нужно проверить, есть ли документ
+        DocumentSnapshot document = checkIfExistDocument(documentId);
+        ApiFuture<WriteResult> collectionsApiFuture = collection.document(documentId).delete();
         return "Successfully deleted " + documentId;
+    }
+
+    private DocumentSnapshot checkIfExistDocument(String documentId) {
+        DocumentReference documentReference = collection.document(documentId);
+        ApiFuture<DocumentSnapshot> future = documentReference.get();
+        try {
+            DocumentSnapshot document = future.get();
+            if (document.exists()) {
+                return document;
+            } else {
+                throw new RuntimeException("Entity Not Found");
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

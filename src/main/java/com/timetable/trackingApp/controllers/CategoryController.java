@@ -22,22 +22,22 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public String createCategory(@RequestBody Categories category) throws InterruptedException, ExecutionException {
+    public String createCategory(@RequestBody Categories category){
         return service.create(category);
     }
 
     @GetMapping("/get")
-    public Categories get(@RequestParam String documentId) throws InterruptedException, ExecutionException {
+    public Categories get(@RequestParam String documentId){
         return service.get(documentId);
     }
 
     @PutMapping("/update")
-    public String update(@RequestBody Categories category) throws InterruptedException, ExecutionException {
+    public String update(@RequestBody Categories category) throws ExecutionException, InterruptedException {
         return service.update(category);
     }
 
     @DeleteMapping("/delete")
-    public String delete(@RequestParam String documentId) {
+    public String delete(@RequestParam String documentId){
         return service.delete(documentId);
     }
 }

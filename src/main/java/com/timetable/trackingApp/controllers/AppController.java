@@ -1,6 +1,8 @@
 package com.timetable.trackingApp.controllers;
 
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.auth.UserRecord;
 import com.timetable.trackingApp.domain.UserDetails;
 import com.timetable.trackingApp.services.FirebaseAuthService;
 import lombok.AllArgsConstructor;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,7 +30,7 @@ public class AppController {
     }
 
     @GetMapping("/getAllUid")
-    public ResponseEntity<List<String>> getAll(){
+    public ResponseEntity<List<String>> getAll() {
         return new ResponseEntity<>(authService.getAll(), HttpStatus.OK);
     }
 
@@ -41,5 +42,10 @@ public class AppController {
     @PutMapping("/update")
     public String updateUser(@RequestBody UserDetails user) throws FirebaseAuthException {
         return authService.update(user);
+    }
+
+    @GetMapping("/getUser")
+    public ResponseEntity<UserInfo[]> getUser(@RequestParam String documentId) {
+        return new ResponseEntity<>(authService.getUser(documentId), HttpStatus.OK);
     }
 }

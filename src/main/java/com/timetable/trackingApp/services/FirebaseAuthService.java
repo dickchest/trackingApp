@@ -70,4 +70,12 @@ public class FirebaseAuthService {
         UserRecord userRecord = FirebaseAuth.getInstance().updateUser(request);
         return userRecord.getUid();
     }
+
+    public UserInfo[] getUser(String documentId) {
+        try {
+            return FirebaseAuth.getInstance().getUser(documentId).getProviderData();
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException("User not found");
+        }
+    }
 }
