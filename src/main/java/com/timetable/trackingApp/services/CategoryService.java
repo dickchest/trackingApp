@@ -40,7 +40,7 @@ public class CategoryService {
         // проверяем каждое поле
         Optional.ofNullable(entity.getName()).ifPresent(request::setName);
 
-        ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(entity);
+        ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(request);
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 

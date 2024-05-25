@@ -4,6 +4,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.timetable.trackingApp.domain.Reviews;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -13,9 +14,13 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class ReviewService {
-    private FirebaseAuthService firebaseAuthService;
+    private final FirebaseAuthService firebaseAuthService;
     private final Firestore dbFirestore = FirestoreClient.getFirestore();
     private final CollectionReference collection = dbFirestore.collection("reviews");
+
+    public ReviewService(FirebaseAuthService firebaseAuthService) {
+        this.firebaseAuthService = firebaseAuthService;
+    }
 
     public List<Reviews> getAll() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> future = collection.get();
@@ -37,15 +42,20 @@ public class ReviewService {
         return document.toObject(Reviews.class);
     }
 
-    public String update(Reviews entity) throws ExecutionException, InterruptedException {
+    public String update(Reviews entity, Principal principal) throws ExecutionException, InterruptedException {
         // проверка, есть ли документ
         Reviews request = get(entity.getId());
+        System.out.println(request.toString());
+        // проверка, что редактируется свой отзыв
+        if (!request.getFromUserId().equals(firebaseAuthService.getUserUid(principal))) {
+            throw new RuntimeException("Not allowed!");
+        }
         // проверяем каждое поле
         Optional.ofNullable(entity.getToUserId()).ifPresent(request::setToUserId);
         Optional.ofNullable(entity.getRating()).ifPresent(request::setRating);
         Optional.ofNullable(entity.getComment()).ifPresent(request::setComment);
 
-        ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(entity);
+        ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(request);
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 

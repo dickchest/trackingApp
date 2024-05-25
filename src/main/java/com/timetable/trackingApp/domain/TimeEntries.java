@@ -3,6 +3,7 @@ package com.timetable.trackingApp.domain;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,6 +14,6 @@ public class TimeEntries {
     private String categoryId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private double duration;
+    private Duration duration;
     private LocalDateTime updateDate;
 }

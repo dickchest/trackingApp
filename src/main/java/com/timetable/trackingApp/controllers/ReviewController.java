@@ -33,8 +33,8 @@ public class ReviewController {
     }
 
     @PutMapping("/update")
-    public String update(@RequestBody Reviews entity) throws InterruptedException, ExecutionException {
-        return service.update(entity);
+    public String update(@RequestBody Reviews entity, Principal principal) throws InterruptedException, ExecutionException {
+        return service.update(entity, principal);
     }
 
     @DeleteMapping("/delete")
