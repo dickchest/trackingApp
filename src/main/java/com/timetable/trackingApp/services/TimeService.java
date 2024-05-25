@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -34,13 +36,15 @@ public class TimeService {
         entity.setUserId(firebaseAuthService.getUserUid(principal));
         // проверить, есть ль категория
         categoryService.get(entity.getCategoryId());
-        // проверить, есть ли начальные и конечные даты
+//         проверить, есть ли начальные и конечные даты
         if (entity.getStartDate() != null && entity.getEndDate() != null) {
-            // вычислить дюрейшн
-            entity.setDuration(Duration.between(entity.getStartDate(), entity.getEndDate()));
+            LocalDateTime startDate = LocalDateTime.parse(entity.getStartDate());
+            LocalDateTime endDate = LocalDateTime.parse(entity.getEndDate());
+            Duration duration = Duration.between(startDate, endDate);
+            System.out.println(duration);
+            entity.setDuration(duration.getSeconds());
         }
-        // заносим дату изменения
-        entity.setUpdateDate(LocalDateTime.now());
+
         ApiFuture<WriteResult> writeResult = addedDocRef.set(entity);
         return addedDocRef.getId();
     }
@@ -69,7 +73,7 @@ public class TimeService {
             Optional.ofNullable(entity.getStartDate()).ifPresent(request::setStartDate);
             Optional.ofNullable(entity.getEndDate()).ifPresent(request::setEndDate);
         // вычисляем новый дюрейшн
-            request.setDuration(Duration.between(entity.getStartDate(), entity.getEndDate()));
+//            request.setDuration(Duration.between(entity.getStartDate(), entity.getEndDate()).getSeconds());
         }
 
         ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(request);
