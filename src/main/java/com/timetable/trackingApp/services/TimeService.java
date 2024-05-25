@@ -3,56 +3,74 @@ package com.timetable.trackingApp.services;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
-import com.timetable.trackingApp.domain.Reviews;
+import com.timetable.trackingApp.domain.TimeEntries;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Service
-public class ReviewService {
+@AllArgsConstructor
+public class TimeService {
     private final FirebaseAuthService firebaseAuthService;
+    private final CategoryService categoryService;
     private final Firestore dbFirestore = FirestoreClient.getFirestore();
-    private final CollectionReference collection = dbFirestore.collection("reviews");
+    private final CollectionReference collection = dbFirestore.collection("time_entries");
 
-    public ReviewService(FirebaseAuthService firebaseAuthService) {
-        this.firebaseAuthService = firebaseAuthService;
-    }
-
-    public List<Reviews> getAll() throws ExecutionException, InterruptedException {
+    public List<TimeEntries> getAll() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> future = collection.get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-
-        return documents.stream().map(x -> x.toObject(Reviews.class)).toList();
+        return documents.stream().map(x -> x.toObject(TimeEntries.class)).toList();
     }
 
-    public String create(Reviews entity, Principal principal) {
+    public String create(TimeEntries entity, Principal principal) {
         DocumentReference addedDocRef = collection.document();
         entity.setId(addedDocRef.getId());
-        entity.setFromUserId(firebaseAuthService.getUserUid(principal));
+        entity.setUserId(firebaseAuthService.getUserUid(principal));
+        // проверить, есть ль категория
+        categoryService.get(entity.getCategoryId());
+        // проверить, есть ли начальные и конечные даты
+        if (entity.getStartDate() != null && entity.getEndDate() != null) {
+            // вычислить дюрейшн
+            entity.setDuration(Duration.between(entity.getStartDate(), entity.getEndDate()));
+        }
+        // заносим дату изменения
+        entity.setUpdateDate(LocalDateTime.now());
         ApiFuture<WriteResult> writeResult = addedDocRef.set(entity);
         return addedDocRef.getId();
     }
 
-    public Reviews get(String documentId) {
+    public TimeEntries get(String documentId) {
         DocumentSnapshot document = checkIfExistDocument(documentId);
-        return document.toObject(Reviews.class);
+        return document.toObject(TimeEntries.class);
     }
 
-    public String update(Reviews entity, Principal principal) throws ExecutionException, InterruptedException {
+    public String update(TimeEntries entity, Principal principal) throws ExecutionException, InterruptedException {
         // проверка, есть ли документ
-        Reviews request = get(entity.getId());
-        System.out.println(request.toString());
+        TimeEntries request = get(entity.getId());
         // проверка, что редактируется свой отзыв
-        if (!request.getFromUserId().equals(firebaseAuthService.getUserUid(principal))) {
+        if (!request.getUserId().equals(firebaseAuthService.getUserUid(principal))) {
             throw new RuntimeException("Not allowed!");
         }
         // проверяем каждое поле
-        Optional.ofNullable(entity.getToUserId()).ifPresent(request::setToUserId);
-        Optional.ofNullable(entity.getRating()).ifPresent(request::setRating);
-        Optional.ofNullable(entity.getComment()).ifPresent(request::setComment);
+        // проверить, есть ль категория
+        if (!entity.getCategoryId().isEmpty()) {
+            if (categoryService.get(entity.getCategoryId()) != null) {
+                request.setCategoryId(entity.getCategoryId());
+            }
+        }
+        // проверяем меняется ли время
+        if (entity.getStartDate() != null || entity.getEndDate() != null) {
+            Optional.ofNullable(entity.getStartDate()).ifPresent(request::setStartDate);
+            Optional.ofNullable(entity.getEndDate()).ifPresent(request::setEndDate);
+        // вычисляем новый дюрейшн
+            request.setDuration(Duration.between(entity.getStartDate(), entity.getEndDate()));
+        }
 
         ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(request);
         return collectionsApiFuture.get().getUpdateTime().toString();
