@@ -35,9 +35,10 @@ public class ReviewService {
         entity.setId(addedDocRef.getId());
         entity.setFromUserId(firebaseAuthService.getUserUid(principal));
         ApiFuture<WriteResult> writeResult = addedDocRef.set(entity);
-        // todo реализовываем занесение в табилцу topUsers этого юзера
+
+        // реализовываем занесение в табилцу topUsers этого юзера
         if (entity.getRating() != null) {
-            topUserService.create(entity.getToUserId(), entity.getRating());
+            topUserService.add(entity.getToUserId(), entity.getRating());
         }
         return addedDocRef.getId();
     }
@@ -57,7 +58,12 @@ public class ReviewService {
         }
         // проверяем каждое поле
         Optional.ofNullable(entity.getToUserId()).ifPresent(request::setToUserId);
-        // todo если рейтинг меняется - реализовываем занесение в табилцу topUsers этого юзера
+
+        // если рейтинг меняется - реализовываем занесение в табилцу topUsers этого юзера
+        if (entity.getRating() != null) {
+            request.setRating(entity.getRating());
+            topUserService.add(entity.getToUserId(), entity.getRating());
+        }
         Optional.ofNullable(entity.getRating()).ifPresent(request::setRating);
         Optional.ofNullable(entity.getComment()).ifPresent(request::setComment);
 
