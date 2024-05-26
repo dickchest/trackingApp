@@ -49,6 +49,8 @@ public class TopUserService {
         try {
             // юзер уже существует в таблице
             entity = get(userId);
+            System.out.println("найдена запись " + entity.getId());
+            System.out.println(entity.getUserId());
         } catch (NotFoundException e) {
             // юзер нет в таблице
             DocumentReference addedDocRef = collection.document();
@@ -72,8 +74,12 @@ public class TopUserService {
 
         // Получаем результат выполнения запроса
         try {
-            QueryDocumentSnapshot document = future.get().getDocuments().getFirst();
-            return Optional.ofNullable(document);
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            if (documents.isEmpty()) {
+                return Optional.empty();
+            } else {
+                return Optional.of(documents.get(0));
+            }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Can't access to top_user");
         }

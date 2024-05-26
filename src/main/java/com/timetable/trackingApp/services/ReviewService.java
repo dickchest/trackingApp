@@ -18,7 +18,7 @@ public class ReviewService {
     private final CollectionReference collection = dbFirestore.collection("reviews");
     private final TopUserService topUserService;
 
-    public ReviewService(FirebaseAuthService firebaseAuthService, ReviewService reviewService, TopUserService topUserService) {
+    public ReviewService(FirebaseAuthService firebaseAuthService, TopUserService topUserService) {
         this.firebaseAuthService = firebaseAuthService;
         this.topUserService = topUserService;
     }
@@ -51,7 +51,6 @@ public class ReviewService {
     public String update(Reviews entity, Principal principal) throws ExecutionException, InterruptedException {
         // проверка, есть ли документ
         Reviews request = get(entity.getId());
-        System.out.println(request.toString());
         // проверка, что редактируется свой отзыв
         if (!request.getFromUserId().equals(firebaseAuthService.getUserUid(principal))) {
             throw new RuntimeException("Not allowed!");
@@ -62,7 +61,7 @@ public class ReviewService {
         // если рейтинг меняется - реализовываем занесение в табилцу topUsers этого юзера
         if (entity.getRating() != null) {
             request.setRating(entity.getRating());
-            topUserService.add(entity.getToUserId(), entity.getRating());
+            topUserService.add(request.getToUserId(), request.getRating());
         }
         Optional.ofNullable(entity.getRating()).ifPresent(request::setRating);
         Optional.ofNullable(entity.getComment()).ifPresent(request::setComment);
