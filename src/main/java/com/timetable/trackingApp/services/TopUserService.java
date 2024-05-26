@@ -49,8 +49,6 @@ public class TopUserService {
         try {
             // юзер уже существует в таблице
             entity = get(userId);
-            System.out.println("найдена запись " + entity.getId());
-            System.out.println(entity.getUserId());
         } catch (NotFoundException e) {
             // юзер нет в таблице
             DocumentReference addedDocRef = collection.document();
