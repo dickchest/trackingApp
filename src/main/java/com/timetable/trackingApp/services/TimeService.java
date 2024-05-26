@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.WeekFields;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -99,5 +102,31 @@ public class TimeService {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Map<Integer, Map<String, List<TimeEntries>>> reportByWeeks() throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> future = collection.get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+        List<TimeEntries> entries = documents.stream()
+                .map(doc -> doc.toObject(TimeEntries.class))
+                .toList();
+
+        // группируем записи по неделям года
+        Map<Integer, List<TimeEntries>> entriesByWeek = entries.stream()
+                .collect(Collectors.groupingBy(entry -> {
+                    LocalDate startDate = entry.getStartDate().toDate().toInstant()
+                            .atZone(ZoneId.systemDefault()).toLocalDate();
+                    return startDate.get(WeekFields.of(Locale.getDefault()).weekOfYear());
+                }));
+
+        // группируем группы по категориях внутри недель
+        Map<Integer, Map<String, List<TimeEntries>>> groupedByWeekAndCategory = new HashMap<>();
+        for (Map.Entry<Integer, List<TimeEntries>> entry : entriesByWeek.entrySet()) {
+            Map<String, List<TimeEntries>> groupedByCategory = entry.getValue().stream()
+                    .collect(Collectors.groupingBy(TimeEntries::getCategoryId));
+            groupedByWeekAndCategory.put(entry.getKey(), groupedByCategory);
+        }
+
+        return groupedByWeekAndCategory;
     }
 }

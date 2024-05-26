@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -44,5 +45,9 @@ public class TimeController {
         return service.delete(documentId);
     }
 
+    @GetMapping("/report")
+    public Map<Integer, Map<String, List<TimeEntries>>> reportByWeeksAndCategory() throws InterruptedException, ExecutionException {
+        return service.reportByWeeks();
+    }
 
 }
