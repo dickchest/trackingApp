@@ -16,7 +16,6 @@ public class ScheduleExecutor {
 
     @Scheduled(fixedDelayString = "P1D")
     public void fixedDelayTask() {
-        System.out.println("One minute passed");
         topUserService.deleteUsersExceptTopTen();
     }
 }
