@@ -1,6 +1,7 @@
 package com.timetable.trackingApp.controllers;
 
 import com.timetable.trackingApp.domain.TimeEntries;
+import com.timetable.trackingApp.dto.TimeEntriesDto;
 import com.timetable.trackingApp.services.TimeService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,13 +19,13 @@ public class TimeController {
     private TimeService service;
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<TimeEntries>> getAll() throws InterruptedException, ExecutionException {
+    public ResponseEntity<List<TimeEntriesDto>> getAll() throws InterruptedException, ExecutionException {
         return new ResponseEntity<>(service.getAll(), HttpStatus.OK);
     }
 
     @PostMapping("/create")
-    public String create(@RequestBody TimeEntries entity, Principal principal) {
-        return service.create(entity, principal);
+    public String create(@RequestBody TimeEntriesDto dto, Principal principal) {
+        return service.create(dto, principal);
     }
 
     @GetMapping("/get")

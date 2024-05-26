@@ -4,12 +4,13 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.timetable.trackingApp.domain.TimeEntries;
+import com.timetable.trackingApp.dto.TimeEntriesDto;
+import com.timetable.trackingApp.services.Utils.TimeConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -22,28 +23,28 @@ public class TimeService {
     private final Firestore dbFirestore = FirestoreClient.getFirestore();
     private final CollectionReference collection = dbFirestore.collection("time_entries");
 
-    public List<TimeEntries> getAll() throws ExecutionException, InterruptedException {
+    public List<TimeEntriesDto> getAll() throws ExecutionException, InterruptedException {
         ApiFuture<QuerySnapshot> future = collection.get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-        return documents.stream().map(x -> x.toObject(TimeEntries.class)).toList();
+        return documents.stream()
+                .map(x -> x.toObject(TimeEntries.class))
+                .map(TimeConverter::toDto)
+                .toList();
     }
 
-    public String create(TimeEntries entity, Principal principal) {
+    public String create(TimeEntriesDto dto, Principal principal) {
         DocumentReference addedDocRef = collection.document();
-        entity.setId(addedDocRef.getId());
-        entity.setUserId(firebaseAuthService.getUserUid(principal));
+        dto.setId(addedDocRef.getId());
+        dto.setUserId(firebaseAuthService.getUserUid(principal));
         // проверить, есть ль категория
-        categoryService.get(entity.getCategoryId());
+        categoryService.get(dto.getCategoryId());
 //         проверить, есть ли начальные и конечные даты
-        if (entity.getStartDate() != null && entity.getEndDate() != null) {
-            LocalDateTime startDate = LocalDateTime.parse(entity.getStartDate());
-            LocalDateTime endDate = LocalDateTime.parse(entity.getEndDate());
-            Duration duration = Duration.between(startDate, endDate);
-            System.out.println(duration);
-            entity.setDuration(duration.getSeconds());
+        if (dto.getStartDate() != null && dto.getEndDate() != null) {
+            Duration duration = Duration.between(dto.getStartDate(), dto.getEndDate());
+            dto.setDuration(duration.getSeconds());
         }
 
-        ApiFuture<WriteResult> writeResult = addedDocRef.set(entity);
+        ApiFuture<WriteResult> writeResult = addedDocRef.set(TimeConverter.fromDto(dto));
         return addedDocRef.getId();
     }
 

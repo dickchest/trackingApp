@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TimeEntriesDto {
     private String id;
+    private String userId;
     private String categoryId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
