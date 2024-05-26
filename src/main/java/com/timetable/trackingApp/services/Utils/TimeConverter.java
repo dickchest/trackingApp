@@ -14,24 +14,25 @@ import java.util.Optional;
 @Service
 public class TimeConverter {
     public static TimeEntriesDto toDto(TimeEntries entity) {
-        return TimeEntriesDto.builder()
-                .id(entity.getId())
-                .categoryId(entity.getCategoryId())
-                .startDate(toLocalTime(entity.getStartDate()))
-                .endDate(toLocalTime(entity.getEndDate()))
-                .duration(entity.getDuration())
-                .build();
+        TimeEntriesDto dto = new TimeEntriesDto();
+        Optional.of(entity.getId()).ifPresent(dto::setId);
+        Optional.ofNullable(entity.getUserId()).ifPresent(dto::setUserId);
+        Optional.ofNullable(entity.getCategoryId()).ifPresent(dto::setCategoryId);
+        Optional.ofNullable(entity.getStartDate()).ifPresent(x -> dto.setStartDate(toLocalTime(entity.getStartDate())));
+        Optional.ofNullable(entity.getEndDate()).ifPresent(x -> dto.setEndDate(toLocalTime(entity.getEndDate())));
+        Optional.ofNullable(entity.getDuration()).ifPresent(dto::setDuration);
+
+        return dto;
     }
 
     public static TimeEntries fromDto(TimeEntriesDto dto) {
-        TimeEntries entity = null;
+        TimeEntries entity = new TimeEntries();
         Optional.of(dto.getId()).ifPresent(entity::setId);
         Optional.ofNullable(dto.getUserId()).ifPresent(entity::setUserId);
         Optional.ofNullable(dto.getCategoryId()).ifPresent(entity::setCategoryId);
         Optional.ofNullable(dto.getStartDate()).ifPresent(x -> entity.setStartDate(toTimeStamp(dto.getStartDate())));
         Optional.ofNullable(dto.getEndDate()).ifPresent(x -> entity.setEndDate(toTimeStamp(dto.getEndDate())));
         Optional.ofNullable(dto.getDuration()).ifPresent(entity::setDuration);
-
         return entity;
     }
 

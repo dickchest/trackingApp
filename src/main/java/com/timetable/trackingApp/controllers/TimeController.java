@@ -3,6 +3,7 @@ package com.timetable.trackingApp.controllers;
 import com.timetable.trackingApp.domain.TimeEntries;
 import com.timetable.trackingApp.dto.TimeEntriesDto;
 import com.timetable.trackingApp.services.TimeService;
+import com.timetable.trackingApp.services.Utils.TimeConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,13 +30,13 @@ public class TimeController {
     }
 
     @GetMapping("/get")
-    public TimeEntries get(@RequestParam String documentId) throws InterruptedException, ExecutionException {
-        return service.get(documentId);
+    public TimeEntriesDto get(@RequestParam String documentId) throws InterruptedException, ExecutionException {
+        return TimeConverter.toDto(service.get(documentId));
     }
 
     @PutMapping("/update")
-    public String update(@RequestBody TimeEntries entity, Principal principal) throws InterruptedException, ExecutionException {
-        return service.update(entity, principal);
+    public String update(@RequestBody TimeEntriesDto dto, Principal principal) throws InterruptedException, ExecutionException {
+        return service.update(dto, principal);
     }
 
     @DeleteMapping("/delete")

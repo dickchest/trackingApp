@@ -43,7 +43,6 @@ public class TimeService {
             Duration duration = Duration.between(dto.getStartDate(), dto.getEndDate());
             dto.setDuration(duration.getSeconds());
         }
-
         ApiFuture<WriteResult> writeResult = addedDocRef.set(TimeConverter.fromDto(dto));
         return addedDocRef.getId();
     }
@@ -53,29 +52,30 @@ public class TimeService {
         return document.toObject(TimeEntries.class);
     }
 
-    public String update(TimeEntries entity, Principal principal) throws ExecutionException, InterruptedException {
+    public String update(TimeEntriesDto dto, Principal principal) throws ExecutionException, InterruptedException {
         // проверка, есть ли документ
-        TimeEntries request = get(entity.getId());
+        TimeEntriesDto request = TimeConverter.toDto(get(dto.getId()));
         // проверка, что редактируется свой отзыв
         if (!request.getUserId().equals(firebaseAuthService.getUserUid(principal))) {
             throw new RuntimeException("Not allowed!");
         }
         // проверяем каждое поле
         // проверить, есть ль категория
-        if (!entity.getCategoryId().isEmpty()) {
-            if (categoryService.get(entity.getCategoryId()) != null) {
-                request.setCategoryId(entity.getCategoryId());
+        if (dto.getCategoryId() != null) {
+            if (categoryService.get(dto.getCategoryId()) != null) {
+                request.setCategoryId(dto.getCategoryId());
             }
         }
         // проверяем меняется ли время
-        if (entity.getStartDate() != null || entity.getEndDate() != null) {
-            Optional.ofNullable(entity.getStartDate()).ifPresent(request::setStartDate);
-            Optional.ofNullable(entity.getEndDate()).ifPresent(request::setEndDate);
+        if (dto.getStartDate() != null || dto.getEndDate() != null) {
+            Optional.ofNullable(dto.getStartDate()).ifPresent(request::setStartDate);
+            Optional.ofNullable(dto.getEndDate()).ifPresent(request::setEndDate);
             // вычисляем новый дюрейшн
-//            request.setDuration(Duration.between(entity.getStartDate(), entity.getEndDate()).getSeconds());
+            Duration duration = Duration.between(request.getStartDate(), request.getEndDate());
+            request.setDuration(duration.getSeconds());
         }
 
-        ApiFuture<WriteResult> collectionsApiFuture = collection.document(entity.getId()).set(request);
+        ApiFuture<WriteResult> collectionsApiFuture = collection.document(dto.getId()).set(TimeConverter.fromDto(request));
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 
