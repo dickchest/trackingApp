@@ -16,9 +16,11 @@ public class ReviewService {
     private final FirebaseAuthService firebaseAuthService;
     private final Firestore dbFirestore = FirestoreClient.getFirestore();
     private final CollectionReference collection = dbFirestore.collection("reviews");
+    private final TopUserService topUserService;
 
-    public ReviewService(FirebaseAuthService firebaseAuthService) {
+    public ReviewService(FirebaseAuthService firebaseAuthService, ReviewService reviewService, TopUserService topUserService) {
         this.firebaseAuthService = firebaseAuthService;
+        this.topUserService = topUserService;
     }
 
     public List<Reviews> getAll() throws ExecutionException, InterruptedException {
@@ -33,6 +35,10 @@ public class ReviewService {
         entity.setId(addedDocRef.getId());
         entity.setFromUserId(firebaseAuthService.getUserUid(principal));
         ApiFuture<WriteResult> writeResult = addedDocRef.set(entity);
+        // todo реализовываем занесение в табилцу topUsers этого юзера
+        if (entity.getRating() != null) {
+            topUserService.create(entity.getToUserId(), entity.getRating());
+        }
         return addedDocRef.getId();
     }
 
@@ -51,6 +57,7 @@ public class ReviewService {
         }
         // проверяем каждое поле
         Optional.ofNullable(entity.getToUserId()).ifPresent(request::setToUserId);
+        // todo если рейтинг меняется - реализовываем занесение в табилцу topUsers этого юзера
         Optional.ofNullable(entity.getRating()).ifPresent(request::setRating);
         Optional.ofNullable(entity.getComment()).ifPresent(request::setComment);
 
