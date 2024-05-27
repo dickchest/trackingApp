@@ -26,23 +26,23 @@ public class TimeController {
     }
 
     @PostMapping("/create")
-    public String create(@RequestBody TimeEntriesDto dto, Principal principal) {
-        return service.create(dto, principal);
+    public ResponseEntity<String> create(@RequestBody TimeEntriesDto dto, Principal principal) {
+        return new ResponseEntity<>(service.create(dto, principal), HttpStatus.CREATED);
     }
 
     @GetMapping("/get")
-    public TimeEntriesDto get(@RequestParam String documentId) throws InterruptedException, ExecutionException {
-        return TimeConverter.toDto(service.get(documentId));
+    public ResponseEntity<TimeEntriesDto> get(@RequestParam String documentId) throws InterruptedException, ExecutionException {
+        return new ResponseEntity<>(TimeConverter.toDto(service.get(documentId)), HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public String update(@RequestBody TimeEntriesDto dto, Principal principal) throws InterruptedException, ExecutionException {
-        return service.update(dto, principal);
+    public ResponseEntity<String> update(@RequestBody TimeEntriesDto dto, Principal principal) throws InterruptedException, ExecutionException {
+        return new ResponseEntity<>(service.update(dto, principal), HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete")
-    public String delete(@RequestParam String documentId) throws ExecutionException, InterruptedException {
-        return service.delete(documentId);
+    public ResponseEntity<String> delete(@RequestParam String documentId) throws ExecutionException, InterruptedException {
+        return new ResponseEntity<>(service.delete(documentId), HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/report")
