@@ -2,7 +2,6 @@ package com.timetable.trackingApp.controllers;
 
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserInfo;
-import com.google.firebase.auth.UserRecord;
 import com.timetable.trackingApp.domain.UserDetails;
 import com.timetable.trackingApp.services.FirebaseAuthService;
 import lombok.AllArgsConstructor;

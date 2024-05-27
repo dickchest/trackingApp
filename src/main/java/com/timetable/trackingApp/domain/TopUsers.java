@@ -1,5 +1,6 @@
 package com.timetable.trackingApp.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 

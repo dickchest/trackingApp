@@ -68,7 +68,6 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$[0].comment").value(testEntity.getComment()));
 
         verify(service).getAll();
-
     }
 
     @Test
