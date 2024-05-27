@@ -23,23 +23,23 @@ public class ReviewController {
     }
 
     @PostMapping("/create")
-    public String create(@RequestBody Reviews entity, Principal principal) {
-        return service.create(entity, principal);
+    public ResponseEntity<String> create(@RequestBody Reviews entity, Principal principal) {
+        return new ResponseEntity<>(service.create(entity, principal), HttpStatus.CREATED);
     }
 
     @GetMapping("/get")
-    public Reviews get(@RequestParam String documentId) throws InterruptedException, ExecutionException {
-        return service.get(documentId);
+    public ResponseEntity<Reviews> get(@RequestParam String documentId) throws InterruptedException, ExecutionException {
+        return new ResponseEntity<>(service.get(documentId), HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public String update(@RequestBody Reviews entity, Principal principal) throws InterruptedException, ExecutionException {
-        return service.update(entity, principal);
+    public ResponseEntity<String> update(@RequestBody Reviews entity, Principal principal) throws InterruptedException, ExecutionException {
+        return new ResponseEntity<>(service.update(entity, principal), HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete")
-    public String delete(@RequestParam String documentId) throws ExecutionException, InterruptedException {
-        return service.delete(documentId);
+    public ResponseEntity<String> delete(@RequestParam String documentId) throws ExecutionException, InterruptedException {
+        return new ResponseEntity<>(service.delete(documentId), HttpStatus.NO_CONTENT);
     }
 
 
