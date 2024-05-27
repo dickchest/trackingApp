@@ -22,22 +22,22 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public String createCategory(@RequestBody Categories category){
-        return service.create(category);
+    public ResponseEntity<String> createCategory(@RequestBody Categories category) {
+        return new ResponseEntity<>(service.create(category), HttpStatus.CREATED);
     }
 
     @GetMapping("/get")
-    public Categories get(@RequestParam String documentId){
-        return service.get(documentId);
+    public ResponseEntity<Categories> get(@RequestParam String documentId) {
+        return new ResponseEntity<>(service.get(documentId), HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public String update(@RequestBody Categories category) throws ExecutionException, InterruptedException {
-        return service.update(category);
+    public ResponseEntity<String> update(@RequestBody Categories category) throws ExecutionException, InterruptedException {
+        return new ResponseEntity<>(service.update(category), HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete")
-    public String delete(@RequestParam String documentId){
-        return service.delete(documentId);
+    public ResponseEntity<String> delete(@RequestParam String documentId) {
+        return new ResponseEntity<>(service.delete(documentId), HttpStatus.NO_CONTENT);
     }
 }
