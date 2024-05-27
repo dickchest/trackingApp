@@ -2,10 +2,12 @@ package com.timetable.trackingApp.domain;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
+@AllArgsConstructor
 public class Reviews {
     @Setter
     private String id; // Уникальный идентификатор отзыва.

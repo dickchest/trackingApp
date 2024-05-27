@@ -1,15 +1,15 @@
 package com.timetable.trackingApp.controllers;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.timetable.trackingApp.domain.Categories;
-import com.timetable.trackingApp.services.CategoryService;
+import com.timetable.trackingApp.domain.Reviews;
+import com.timetable.trackingApp.services.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -17,84 +17,94 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@WebMvcTest(value = CategoryController.class)
-class CategoryControllerIntegrationTest {
+@WebMvcTest(value = ReviewController.class)
+class ReviewControllerTest {
+    @Value("/reviews/")
+    private String basePath;
+
     @Autowired
     private MockMvc mockMvc;
+
     @MockBean
-    private CategoryService categoryService;
+    private ReviewService service;
+
     @InjectMocks
-    private CategoryController categoryController;
+    private ReviewController controller;
 
     @Autowired
     private ObjectMapper objectMapper;
-    private Categories testCategory;
+
+    private Reviews testEntity;
 
     @BeforeEach
     void setUp() {
-        testCategory = new Categories("1", "Test Category");
+        testEntity = new Reviews("1", "fromUserId", "toUserId", 10, "testComment");
     }
 
     @Test
     @WithMockUser
-    public void getAll() throws Exception {
-        List<Categories> allCategories = Collections.singletonList(testCategory);
+    void getAll() throws Exception {
+        List<Reviews> allEntities = Collections.singletonList(testEntity);
 
-        when(categoryService.getAll()).thenReturn(allCategories);
+        when(service.getAll()).thenReturn(allEntities);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/categories/getAll")
+        mockMvc.perform(MockMvcRequestBuilders.get(basePath + "getAll")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(testCategory.getId()))
-                .andExpect(jsonPath("$[0].name").value(testCategory.getName()));
+                .andExpect(jsonPath("$[0].id").value(testEntity.getId()))
+                .andExpect(jsonPath("$[0].fromUserId").value(testEntity.getFromUserId()))
+                .andExpect(jsonPath("$[0].toUserId").value(testEntity.getToUserId()))
+                .andExpect(jsonPath("$[0].rating").value(testEntity.getRating()))
+                .andExpect(jsonPath("$[0].comment").value(testEntity.getComment()));
 
-        verify(categoryService).getAll();
+        verify(service).getAll();
+
     }
 
     @Test
     @WithMockUser
-    void createCategory() throws Exception {
+    void create() throws Exception {
         String createId = "abc123";
 
-        when(categoryService.create(any(Categories.class))).thenReturn(createId);
+        when(service.create(any(Reviews.class), any(Principal.class))).thenReturn(createId);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/categories/create")
+        mockMvc.perform(MockMvcRequestBuilders.post(basePath + "create")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testCategory)))
-//                .andDo(print())
+                        .content(objectMapper.writeValueAsString(testEntity)))
                 .andExpect(status().isCreated())
                 .andExpect(content().string(createId));
 
-        verify(categoryService).create(any(Categories.class));
+        verify(service).create(any(Reviews.class), any(Principal.class));
     }
 
     @Test
     @WithMockUser
     void get() throws Exception {
-        when(categoryService.get(anyString())).thenReturn(testCategory);
+        when(service.get(anyString())).thenReturn(testEntity);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/categories/get")
+        mockMvc.perform(MockMvcRequestBuilders.get(basePath + "get")
                         .param("documentId", "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(testCategory.getId()))
-                .andExpect(jsonPath("$.name").value(testCategory.getName()));
+                .andExpect(jsonPath("$.id").value(testEntity.getId()))
+                .andExpect(jsonPath("$.fromUserId").value(testEntity.getFromUserId()))
+                .andExpect(jsonPath("$.toUserId").value(testEntity.getToUserId()))
+                .andExpect(jsonPath("$.rating").value(testEntity.getRating()))
+                .andExpect(jsonPath("$.comment").value(testEntity.getComment()));
 
-        verify(categoryService).get(anyString());
+        verify(service).get(anyString());
     }
 
     @Test
@@ -102,17 +112,16 @@ class CategoryControllerIntegrationTest {
     void update() throws Exception {
         String expectedResponse = "Expected Response";
 
-        when(categoryService.update(any(Categories.class))).thenReturn(expectedResponse);
+        when(service.update(any(Reviews.class), any(Principal.class))).thenReturn(expectedResponse);
 
-        mockMvc.perform(put("/categories/update")
+        mockMvc.perform(put(basePath + "update")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testCategory)))
-//                .andDo(print())
+                        .content(objectMapper.writeValueAsString(testEntity)))
                 .andExpect(status().isAccepted())
                 .andExpect(content().string(expectedResponse));
 
-        verify(categoryService).update(any(Categories.class));
+        verify(service).update(any(Reviews.class), any(Principal.class));
     }
 
     @Test
@@ -120,15 +129,15 @@ class CategoryControllerIntegrationTest {
     void delete() throws Exception {
         String expectedResponse = "Successfully deleted";
 
-        when(categoryService.delete(anyString())).thenReturn(expectedResponse);
+        when(service.delete(anyString())).thenReturn(expectedResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/categories/delete")
+        mockMvc.perform(MockMvcRequestBuilders.delete(basePath + "delete")
                         .with(csrf())
                         .param("documentId", "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(expectedResponse));
 
-        verify(categoryService).delete(anyString());
+        verify(service).delete(anyString());
     }
 }
